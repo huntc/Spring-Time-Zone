@@ -60,7 +60,7 @@
 
 	<!-- AMQP - share time zone resources -->
 	<bean id="amqpConnectionFactory"
-		class="org.springframework.amqp.rabbit.connection.SingleConnectionFactory">
+		class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory">
 		<constructor-arg value="localhost" />
 		<property name="username" value="guest" />
 		<property name="password" value="guest" />
