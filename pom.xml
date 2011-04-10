@@ -11,7 +11,7 @@
 		<java-version>1.6</java-version>
 		<org.springframework-version>3.0.4.RELEASE</org.springframework-version>
 		<org.springframework.integration-version>2.0.3.RELEASE</org.springframework.integration-version>
-		<org.springframework.amqp-version>1.0.0.BUILD-SNAPSHOT</org.springframework.amqp-version>
+		<org.springframework.amqp-version>1.0.0.RC1</org.springframework.amqp-version>
 		<org.aspectj-version>1.6.9</org.aspectj-version>
 		<org.slf4j-version>1.5.10</org.slf4j-version>
 	</properties>
@@ -148,7 +148,7 @@
 		<dependency>
 			<groupId>com.classactionpl.tz</groupId>
 			<artifactId>zoneinfo-tz</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>1.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
