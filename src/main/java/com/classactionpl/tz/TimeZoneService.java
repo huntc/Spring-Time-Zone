@@ -26,8 +26,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
@@ -42,11 +40,6 @@ public class TimeZoneService {
 
 	/** */
 	private static final int MILLIS_PER_SECOND = 1000;
-
-	/**
-	 * The object used to publish tzdata.
-	 */
-	private TzdataPublisher tzDataPublisher;
 
 	/**
 	 * Return a list of available TZ ids.
@@ -94,10 +87,6 @@ public class TimeZoneService {
 		return offset;
 	}
 
-	public TzdataPublisher getTzDataPublisher() {
-		return tzDataPublisher;
-	}
-
 	/**
 	 * Refresh the time zones given a file passed in.
 	 * 
@@ -116,17 +105,11 @@ public class TimeZoneService {
 			TarArchiveInputStream tarIs = new TarArchiveInputStream(gzippedIs);
 
 			try {
-				// FIXME: Send out the real object.
-				tzDataPublisher.publish("Something");
+				// FIXME: Load time zones.
 			} finally {
 				tarIs.close();
 			}
 			zoneInfoFile.delete();
 		}
-	}
-
-	@Inject
-	public void setTzDataPublisher(TzdataPublisher tzDataPublisher) {
-		this.tzDataPublisher = tzDataPublisher;
 	}
 }

@@ -49,48 +49,4 @@
 	<si:service-activator input-channel="zoneinfoChannel"
 		ref="timeZoneService" method="refreshTimeZones" />
 
-	<!-- Messaging -->
-	<bean id="tzdataPublisher" class="com.classactionpl.tz.TzdataPublisherImpl" />
-
-	<si:channel id="publishTzdata" datatype="java.lang.String" />
-
-	<si:channel id="tzdataChannel" datatype="java.lang.String" />
-
-	<stream:stdout-channel-adapter channel="tzdataChannel" />
-
-	<!-- AMQP - share time zone resources -->
-	<bean id="amqpConnectionFactory"
-		class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory">
-		<constructor-arg value="localhost" />
-		<property name="username" value="guest" />
-		<property name="password" value="guest" />
-	</bean>
-	<bean id="amqpTemplate" class="org.springframework.amqp.rabbit.core.RabbitTemplate">
-		<property name="connectionFactory" ref="amqpConnectionFactory" />
-	</bean>
-	<rabbit:admin connection-factory="amqpConnectionFactory" />
-	<rabbit:queue name="com.classactionpl.tz.tzdata" />
-	<amqp:inbound-channel-adapter queue-names="com.classactionpl.tz.tzdata"
-		channel="tzdataChannel" connection-factory="amqpConnectionFactory" />
-	<rabbit:fanout-exchange name="com.classactionpl.tz.tzdata.fanout">
-		<rabbit:bindings>
-			<rabbit:binding queue="com.classactionpl.tz.tzdata" />
-		</rabbit:bindings>
-	</rabbit:fanout-exchange>
-	<amqp:outbound-channel-adapter channel="publishTzdata"
-		exchange-name="com.classactionpl.tz.tzdata.fanout" amqp-template="amqpTemplate" />
-		
-	<!-- JMS for testing performance out compared with AMQP <bean id="jmsConnectionFactory" 
-		class="org.springframework.jms.connection.CachingConnectionFactory"> <property 
-		name="targetConnectionFactory"> <bean class="org.apache.activemq.ActiveMQConnectionFactory"> 
-		<property name="brokerURL" value="tcp://localhost:61616" /> </bean> </property> 
-		<property name="sessionCacheSize" value="10" /> <property name="cacheProducers" 
-		value="false" /> </bean> <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate"> 
-		<property name="connectionFactory" ref="jmsConnectionFactory" /> </bean> 
-		<bean id="tzdataJmsTopic" class="org.apache.activemq.command.ActiveMQTopic"> 
-		<constructor-arg value="com.classactionpl.tz.tzdata" /> </bean> <jms:message-driven-channel-adapter 
-		destination="tzdataJmsTopic" channel="tzdataChannel" connection-factory="jmsConnectionFactory" 
-		/> <jms:outbound-channel-adapter destination="tzdataJmsTopic" channel="publishTzdata" 
-		jms-template="jmsTemplate" /> -->
-
 </beans>
