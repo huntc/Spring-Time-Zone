@@ -1,0 +1,8 @@
+This is a project that provides a few web services for the Zoneinfo TZ project:
+
+http://zoneinfo-tz.codehaus.org/
+
+The project serves to illustrate a number of Spring projects in action including:
+
+* Spring MVC/REST; and
+* Spring Integration
