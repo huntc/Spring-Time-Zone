@@ -21,4 +21,4 @@
  * Implements sophisticated TimeZone related classes using the standard
  * interfaces.
  */
-package com.classactionpl.tz;
+package org.springframework.samples.springtz;

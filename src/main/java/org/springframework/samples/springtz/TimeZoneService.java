@@ -17,18 +17,21 @@
  * under the License.    
  */
 
-package com.classactionpl.tz;
+package org.springframework.samples.springtz;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.compressors.CompressorInputStream;
-import org.apache.commons.compress.compressors.CompressorStreamFactory;
+import com.classactionpl.tz.AbstractZone;
+import com.classactionpl.tz.Rule;
+import com.classactionpl.tz.ZoneDetail;
+import com.classactionpl.tz.ZoneFactory;
+import com.classactionpl.tz.ZoneinfoTimeZone;
 
 /**
  * Our main service interface for providing time zone services.
@@ -88,28 +91,18 @@ public class TimeZoneService {
 	}
 
 	/**
-	 * Refresh the time zones given a file passed in.
+	 * Refresh the time zones given a tar gz file passed in.
 	 * 
 	 * @param zoneInfoFile
-	 *            the file to be parsed.
-	 * @throws Exception
+	 *            the tar gz file to be parsed.
+	 * @throws FileNotFoundException
 	 *             if something goes wrong.
 	 */
-	public void refreshTimeZones(File zoneInfoFile) throws Exception {
-		if (zoneInfoFile.isFile() && zoneInfoFile.getName().endsWith(".tar.gz")) {
-			BufferedInputStream is = new BufferedInputStream(
-					new FileInputStream(zoneInfoFile));
-			CompressorInputStream gzippedIs = new CompressorStreamFactory()
-					.createCompressorInputStream(CompressorStreamFactory.GZIP,
-							is);
-			TarArchiveInputStream tarIs = new TarArchiveInputStream(gzippedIs);
+	public void parseZoneinfoFile(File zoneInfoFile)
+			throws FileNotFoundException {
 
-			try {
-				// FIXME: Load time zones.
-			} finally {
-				tarIs.close();
-			}
-			zoneInfoFile.delete();
-		}
+		ZoneFactory factory = new ZoneFactory();
+		Map<String, AbstractZone> zones = ZoneinfoTimeZone.getZones();
+		factory.parse(new FileInputStream(zoneInfoFile), zones);
 	}
 }

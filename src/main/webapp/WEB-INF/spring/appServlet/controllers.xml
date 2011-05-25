@@ -8,9 +8,6 @@
 
 	<!-- Scans within the base package of the application for @Components to 
 		configure as beans -->
-	<context:component-scan base-package="com.classactionpl.tz" />
-
-	<!-- Other dependencies -->
-	<bean id="timeZoneService" class="com.classactionpl.tz.TimeZoneService" />
+	<context:component-scan base-package="org.springframework.samples.springtz" />
 
 </beans>

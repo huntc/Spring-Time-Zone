@@ -25,11 +25,12 @@
 	<!-- General SI things. -->
 	<si:annotation-config />
 
-	<!-- FTP - pick up the zoneinfo files -->
+	<!-- FTP - pick up the zoneinfo files once per 1 month (midnight on the 
+		first day) -->
 	<bean id="zoneinfoFtpClientFactory"
 		class="org.springframework.integration.ftp.session.DefaultFtpSessionFactory">
 		<property name="host" value="elsie.nci.nih.gov" />
-		<property name="port" value="22" />
+		<property name="port" value="21" />
 		<property name="username" value="anonymous" />
 		<property name="password" value="anonymous" />
 		<property name="clientMode" value="0" />
@@ -37,16 +38,35 @@
 	</bean>
 
 	<si-ftp:inbound-channel-adapter id="zoneInfoFtpInbound"
-		channel="zoneinfoChannel" session-factory="zoneinfoFtpClientFactory"
+		channel="compressedZoneinfoChannel" session-factory="zoneinfoFtpClientFactory"
 		charset="UTF-8" auto-create-local-directory="true"
 		delete-remote-files="false" filename-pattern="tzdata*.tar.gz"
 		remote-directory="pub" local-directory="${java.io.tmpdir}${file.separator}tzdata">
-		<si:poller cron="0 * * * * *" max-messages-per-poll="-1" />
+		<si:poller cron="0 0 1 * * *" max-messages-per-poll="-1" />
 	</si-ftp:inbound-channel-adapter>
+
+	<si:channel id="compressedZoneinfoChannel" datatype="java.io.File" />
+
+	<!-- Decompress the tar.gz file into a collection of files. -->
+	<si:splitter input-channel="compressedZoneinfoChannel" ref="tarGzDecompressor"
+		method="decompress" output-channel="decompressedZoneinfoChannel" />
+
+	<bean id="tarGzDecompressor" class="org.springframework.samples.springtz.TarGzDecompressor" />
+
+	<si:channel id="decompressedZoneinfoChannel" datatype="java.io.File" />
+
+	<!-- Pass on only the files that we know are zoneinfo files (there is no 
+		telling file extension to check). -->
+	<si:filter input-channel="decompressedZoneinfoChannel"
+		expression="payload.name matches '(africa|antarctica|asia|australasia|backward|etcetera|europe|northamerica|pacificnew|solar87|solar88|solar89|southamerica|systemv).*'"
+		output-channel="zoneinfoChannel" />
 
 	<si:channel id="zoneinfoChannel" datatype="java.io.File" />
 
+	<!-- Parse a zoneinfo file. -->
 	<si:service-activator input-channel="zoneinfoChannel"
-		ref="timeZoneService" method="refreshTimeZones" />
+		ref="timeZoneService" method="parseZoneinfoFile" />
+
+	<bean id="timeZoneService" class="org.springframework.samples.springtz.TimeZoneService" />
 
 </beans>
