@@ -42,8 +42,12 @@
 		charset="UTF-8" auto-create-local-directory="true"
 		delete-remote-files="false" filename-pattern="tzdata*.tar.gz"
 		remote-directory="pub" local-directory="${java.io.tmpdir}${file.separator}tzdata">
-		<si:poller cron="0 0 1 * * *" max-messages-per-poll="-1" />
+		<si:poller max-messages-per-poll="-1" trigger="startupCronTrigger" />
 	</si-ftp:inbound-channel-adapter>
+
+	<bean id="startupCronTrigger" class="org.springframework.samples.springtz.StartupCronTrigger">
+		<constructor-arg value="0 0 0 1 * *" />
+	</bean>
 
 	<si:channel id="compressedZoneinfoChannel" datatype="java.io.File" />
 
