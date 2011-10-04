@@ -33,7 +33,7 @@
 		<property name="port" value="21" />
 		<property name="username" value="anonymous" />
 		<property name="password" value="anonymous" />
-		<property name="clientMode" value="0" />
+		<property name="clientMode" value="2" />
 		<property name="bufferSize" value="100000" />
 	</bean>
 
