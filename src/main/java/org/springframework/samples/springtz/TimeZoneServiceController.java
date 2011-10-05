@@ -21,9 +21,7 @@ package org.springframework.samples.springtz;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -32,7 +30,7 @@ import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.integration.Message;
 import org.springframework.integration.channel.AbstractPollableChannel;
 import org.springframework.integration.core.MessagingTemplate;
-import org.springframework.integration.message.GenericMessage;
+import org.springframework.integration.support.MessageBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -74,8 +72,8 @@ public class TimeZoneServiceController {
 	public List<?> getAvailableIDs() {
 		List<?> payloadList;
 
-		Message<?> reply = template.sendAndReceive(idsRequestChannel,
-				new GenericMessage<String>(""));
+		Message<String> request = MessageBuilder.withPayload("").build();
+		Message<?> reply = template.sendAndReceive(idsRequestChannel, request);
 
 		if (reply != null) {
 			payloadList = (List<?>) reply.getPayload();
@@ -105,11 +103,9 @@ public class TimeZoneServiceController {
 
 		Integer result;
 
-		Map<String, Object> headers = new HashMap<String, Object>(1);
-		headers.put("when", when);
 		String payload = country + "/" + locality;
-		GenericMessage<String> request = new GenericMessage<String>(payload,
-				headers);
+		Message<String> request = MessageBuilder.withPayload(payload)
+				.setHeader("when", when).build();
 
 		Message<?> reply = template.sendAndReceive(offsetRequestChannel,
 				request);
