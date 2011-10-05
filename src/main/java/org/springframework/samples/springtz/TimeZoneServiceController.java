@@ -19,12 +19,14 @@
 
 package org.springframework.samples.springtz;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.integration.Message;
@@ -66,22 +68,30 @@ public class TimeZoneServiceController {
 	 * Get the available ids.
 	 * 
 	 * @return a list of ides.
+	 * @throws IOException
+	 *             something went wrong.
 	 */
 	@RequestMapping(value = "ids", method = RequestMethod.GET)
 	@ResponseBody
-	public List<?> getAvailableIDs() {
-		List<?> payloadList;
+	public List<?> getAvailableIDs(HttpServletResponse httpResponse)
+			throws IOException {
+		List<?> result = null;
 
 		Message<String> request = MessageBuilder.withPayload("").build();
 		Message<?> reply = template.sendAndReceive(idsRequestChannel, request);
 
 		if (reply != null) {
-			payloadList = (List<?>) reply.getPayload();
-		} else {
-			payloadList = null;
+			Object payload = reply.getPayload();
+			if (payload instanceof List<?>) {
+				result = (List<?>) reply.getPayload();
+			}
 		}
 
-		return payloadList;
+		if (result == null) {
+			httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
+		}
+
+		return result;
 	}
 
 	/**
@@ -94,25 +104,33 @@ public class TimeZoneServiceController {
 	 * @param when
 	 *            the time to get the response at.
 	 * @return the model object key to use in the response.
+	 * @throws IOException
+	 *             something went wrong.
 	 */
 	@RequestMapping(value = "offset/{country}/{locality}", method = RequestMethod.GET)
 	@ResponseBody
 	public Integer getOffset(@PathVariable("country") String country,
 			@PathVariable("locality") String locality,
-			@RequestParam("when") Date when) {
+			@RequestParam("when") Date when, HttpServletResponse httpResponse)
+			throws IOException {
 
-		Integer result;
+		Integer result = null;
 
-		String payload = country + "/" + locality;
-		Message<String> request = MessageBuilder.withPayload(payload)
+		String id = country + "/" + locality;
+		Message<String> request = MessageBuilder.withPayload(id)
 				.setHeader("when", when).build();
 
 		Message<?> reply = template.sendAndReceive(offsetRequestChannel,
 				request);
 		if (reply != null) {
-			result = (Integer) reply.getPayload();
-		} else {
-			result = null;
+			Object payload = reply.getPayload();
+			if (payload instanceof Integer) {
+				result = (Integer) payload;
+			}
+		}
+
+		if (result == null) {
+			httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
 		}
 
 		return result;

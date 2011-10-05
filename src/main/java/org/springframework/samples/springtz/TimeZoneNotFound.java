@@ -19,8 +19,6 @@
 
 package org.springframework.samples.springtz;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * Thrown when a time zone object cannot be found.
@@ -28,7 +26,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * @author huntc
  * 
  */
-@ResponseStatus(HttpStatus.NOT_FOUND)
 public class TimeZoneNotFound extends RuntimeException {
 	/**
 		 * 
