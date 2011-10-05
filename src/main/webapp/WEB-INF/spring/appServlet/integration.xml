@@ -71,6 +71,27 @@
 	<si:service-activator input-channel="zoneinfoChannel"
 		ref="timeZoneService" method="parseZoneinfoFile" />
 
+	<!-- An implementation of our service -->
 	<bean id="timeZoneService" class="org.springframework.samples.springtz.TimeZoneService" />
 
+	<!-- Wire up the tz service so that it can be called by anything in the 
+		Java world such as the web service. -->
+
+	<si:service-activator input-channel="idsRequestChannel"
+		ref="timeZoneService" method="getAvailableIDs">
+		<si:poller receive-timeout="30000" fixed-rate="10" />
+	</si:service-activator>
+
+	<si:service-activator input-channel="offsetRequestChannel"
+		expression="@timeZoneService.getOffset(payload, headers.when)">
+		<si:poller receive-timeout="30000" fixed-rate="10" />
+	</si:service-activator>
+
+	<si:channel id="idsRequestChannel">
+		<si:queue capacity="100" />
+	</si:channel>
+
+	<si:channel id="offsetRequestChannel">
+		<si:queue capacity="100" />
+	</si:channel>
 </beans>

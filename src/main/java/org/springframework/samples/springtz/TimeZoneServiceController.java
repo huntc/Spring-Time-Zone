@@ -21,12 +21,18 @@ package org.springframework.samples.springtz;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import javax.inject.Inject;
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.integration.Message;
+import org.springframework.integration.channel.AbstractPollableChannel;
+import org.springframework.integration.core.MessagingTemplate;
+import org.springframework.integration.message.GenericMessage;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -43,10 +49,20 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/tz")
 public class TimeZoneServiceController {
 
-	/**
-	 * The time zone service to use.
+	/*
+	 * The channels we're going to use.
 	 */
-	private TimeZoneService timeZoneService;
+	private AbstractPollableChannel idsRequestChannel;
+	private AbstractPollableChannel offsetRequestChannel;
+
+	private static long sendReceiveTimeout = 2000L;
+
+	private final MessagingTemplate template = new MessagingTemplate();
+
+	public TimeZoneServiceController() {
+		template.setReceiveTimeout(sendReceiveTimeout);
+		template.setSendTimeout(sendReceiveTimeout);
+	}
 
 	/**
 	 * Get the available ids.
@@ -55,8 +71,19 @@ public class TimeZoneServiceController {
 	 */
 	@RequestMapping(value = "ids", method = RequestMethod.GET)
 	@ResponseBody
-	public List<String> getAvailableIDs() {
-		return timeZoneService.getAvailableIDs();
+	public List<?> getAvailableIDs() {
+		List<?> payloadList;
+
+		Message<?> reply = template.sendAndReceive(idsRequestChannel,
+				new GenericMessage<String>(""));
+
+		if (reply != null) {
+			payloadList = (List<?>) reply.getPayload();
+		} else {
+			payloadList = null;
+		}
+
+		return payloadList;
 	}
 
 	/**
@@ -76,11 +103,23 @@ public class TimeZoneServiceController {
 			@PathVariable("locality") String locality,
 			@RequestParam("when") Date when) {
 
-		return timeZoneService.getOffset(country + "/" + locality, when);
-	}
+		Integer result;
 
-	public TimeZoneService getTimeZoneService() {
-		return timeZoneService;
+		Map<String, Object> headers = new HashMap<String, Object>(1);
+		headers.put("when", when);
+		String payload = country + "/" + locality;
+		GenericMessage<String> request = new GenericMessage<String>(payload,
+				headers);
+
+		Message<?> reply = template.sendAndReceive(offsetRequestChannel,
+				request);
+		if (reply != null) {
+			result = (Integer) reply.getPayload();
+		} else {
+			result = null;
+		}
+
+		return result;
 	}
 
 	/**
@@ -99,9 +138,15 @@ public class TimeZoneServiceController {
 				parser, false));
 	}
 
-	@Inject
-	public void setTimeZoneService(TimeZoneService timeZoneService) {
-		this.timeZoneService = timeZoneService;
+	@Resource(name = "idsRequestChannel")
+	public void setIdsRequestChannel(AbstractPollableChannel idsRequestChannel) {
+		this.idsRequestChannel = idsRequestChannel;
+	}
+
+	@Resource(name = "offsetRequestChannel")
+	public void setOffsetRequestChannel(
+			AbstractPollableChannel offsetRequestChannel) {
+		this.offsetRequestChannel = offsetRequestChannel;
 	}
 
 }
