@@ -22,9 +22,6 @@
 	<bean
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" />
 
-	<!-- General SI things. -->
-	<si:annotation-config />
-
 	<!-- FTP - pick up the zoneinfo files once per 1 month (midnight on the 
 		first day) -->
 	<bean id="zoneinfoFtpClientFactory"
