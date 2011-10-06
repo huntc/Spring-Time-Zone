@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.integration.Message;
-import org.springframework.integration.channel.AbstractPollableChannel;
+import org.springframework.integration.channel.AbstractMessageChannel;
 import org.springframework.integration.core.MessagingTemplate;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.stereotype.Controller;
@@ -52,8 +52,8 @@ public class TimeZoneServiceController {
 	/*
 	 * The channels we're going to use.
 	 */
-	private AbstractPollableChannel idsRequestChannel;
-	private AbstractPollableChannel offsetRequestChannel;
+	private AbstractMessageChannel idsRequestChannel;
+	private AbstractMessageChannel offsetRequestChannel;
 
 	private static long sendReceiveTimeout = 2000L;
 
@@ -153,13 +153,13 @@ public class TimeZoneServiceController {
 	}
 
 	@Resource(name = "idsRequestChannel")
-	public void setIdsRequestChannel(AbstractPollableChannel idsRequestChannel) {
+	public void setIdsRequestChannel(AbstractMessageChannel idsRequestChannel) {
 		this.idsRequestChannel = idsRequestChannel;
 	}
 
 	@Resource(name = "offsetRequestChannel")
 	public void setOffsetRequestChannel(
-			AbstractPollableChannel offsetRequestChannel) {
+			AbstractMessageChannel offsetRequestChannel) {
 		this.offsetRequestChannel = offsetRequestChannel;
 	}
 
