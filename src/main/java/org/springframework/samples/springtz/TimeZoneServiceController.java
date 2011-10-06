@@ -19,12 +19,14 @@
 
 package org.springframework.samples.springtz;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.stereotype.Controller;
@@ -69,14 +71,22 @@ public class TimeZoneServiceController {
 	 * @param when
 	 *            the time to get the response at.
 	 * @return the model object key to use in the response.
+	 * @throws IOException
+	 *             if something goes wrong.
 	 */
 	@RequestMapping(value = "offset/{country}/{locality}", method = RequestMethod.GET)
 	@ResponseBody
 	public Integer getOffset(@PathVariable("country") String country,
 			@PathVariable("locality") String locality,
-			@RequestParam("when") Date when) {
+			@RequestParam("when") Date when, HttpServletResponse httpResponse)
+			throws IOException {
 
-		return timeZoneService.getOffset(country + "/" + locality, when);
+		try {
+			return timeZoneService.getOffset(country + "/" + locality, when);
+		} catch (TimeZoneNotFound e) {
+			httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return null;
+		}
 	}
 
 	public TimeZoneService getTimeZoneService() {
