@@ -96,7 +96,7 @@
 	<!-- Wire up AMQP -->
 
 	<amqp:outbound-channel-adapter channel="idsRequestChannel"
-		exchange-name="org.springframework.samples.springtz.ids"
+		exchange-name="org.springframework.samples.springtz" routing-key="ids"
 		amqp-template="amqpTemplate" />
 
 	<amqp:inbound-channel-adapter
@@ -104,7 +104,7 @@
 		connection-factory="amqpConnectionFactory" />
 
 	<amqp:outbound-channel-adapter channel="offsetRequestChannel"
-		exchange-name="org.springframework.samples.springtz.offset"
+		exchange-name="org.springframework.samples.springtz" routing-key="offset"
 		amqp-template="amqpTemplate" />
 
 	<amqp:inbound-channel-adapter
@@ -121,5 +121,14 @@
 	<rabbit:queue name="org.springframework.samples.springtz.ids" />
 
 	<rabbit:queue name="org.springframework.samples.springtz.offset" />
+
+	<rabbit:direct-exchange name="org.springframework.samples.springtz">
+		<rabbit:bindings>
+			<rabbit:binding queue="org.springframework.samples.springtz.ids"
+				key="ids" />
+			<rabbit:binding queue="org.springframework.samples.springtz.offset"
+				key="offset" />
+		</rabbit:bindings>
+	</rabbit:direct-exchange>
 
 </beans>
