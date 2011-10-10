@@ -30,7 +30,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.integration.Message;
+import org.springframework.integration.MessageHeaders;
 import org.springframework.integration.channel.AbstractMessageChannel;
+import org.springframework.integration.channel.RendezvousChannel;
 import org.springframework.integration.core.MessagingTemplate;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.stereotype.Controller;
@@ -77,8 +79,11 @@ public class TimeZoneServiceController {
 			throws IOException {
 		List<?> result = null;
 
-		Message<String> request = MessageBuilder.withPayload("").build();
-		Message<?> reply = template.sendAndReceive(idsRequestChannel, request);
+		RendezvousChannel replyChannel = new RendezvousChannel();
+		Message<String> request = MessageBuilder.withPayload("")
+				.setHeader(MessageHeaders.REPLY_CHANNEL, replyChannel).build();
+		template.send(idsRequestChannel, request);
+		Message<?> reply = template.receive(replyChannel);
 
 		if (reply != null) {
 			Object payload = reply.getPayload();
@@ -120,6 +125,7 @@ public class TimeZoneServiceController {
 		Message<String> request = MessageBuilder.withPayload(id)
 				.setHeader("when", when).build();
 
+		// TODO: Re-factor to obtain receipt independently.
 		Message<?> reply = template.sendAndReceive(offsetRequestChannel,
 				request);
 		if (reply != null) {

@@ -82,7 +82,7 @@
 	</si:service-activator>
 
 	<si:channel id="idsRequestChannel" />
-
+	
 	<si:channel id="idsQueueChannel">
 		<si:queue capacity="100" />
 	</si:channel>
@@ -95,21 +95,18 @@
 
 	<!-- Wire up AMQP -->
 
-	<amqp:outbound-channel-adapter channel="idsRequestChannel"
-		exchange-name="org.springframework.samples.springtz" routing-key="ids"
-		amqp-template="amqpTemplate" />
+	<amqp:outbound-gateway request-channel="idsRequestChannel"
+		exchange-name="org.springframework.samples.springtz" routing-key="ids" />
 
-	<amqp:inbound-channel-adapter
-		queue-names="org.springframework.samples.springtz.ids" channel="idsQueueChannel"
-		connection-factory="amqpConnectionFactory" />
+	<amqp:inbound-gateway queue-names="org.springframework.samples.springtz.ids"
+		request-channel="idsQueueChannel" connection-factory="amqpConnectionFactory" />
 
-	<amqp:outbound-channel-adapter channel="offsetRequestChannel"
+	<amqp:outbound-gateway request-channel="offsetRequestChannel"
 		exchange-name="org.springframework.samples.springtz" routing-key="offset"
 		amqp-template="amqpTemplate" />
 
-	<amqp:inbound-channel-adapter
-		queue-names="org.springframework.samples.springtz.offset" channel="offsetQueueChannel"
-		connection-factory="amqpConnectionFactory" />
+	<amqp:inbound-gateway queue-names="org.springframework.samples.springtz.offset"
+		request-channel="offsetQueueChannel" connection-factory="amqpConnectionFactory" />
 
 	<!-- Configure RMQ -->
 	<rabbit:connection-factory id="amqpConnectionFactory" />
