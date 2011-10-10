@@ -74,6 +74,12 @@
 	<!-- Wire up the tz service so that it can be called by anything in the 
 		Java world such as the web service. -->
 
+	<si:gateway id="timeZoneServiceGateway"
+		service-interface="org.springframework.samples.springtz.TimeZoneServiceGateway">
+		<si:method name="getAvailableIDs" request-channel="idsRequestChannel" />
+		<si:method name="getOffset" request-channel="offsetRequestChannel" />
+	</si:gateway>
+
 	<si:service-activator input-channel="idsRequestChannel"
 		ref="timeZoneService" method="getAvailableIDs">
 		<si:poller receive-timeout="30000" fixed-rate="10" />

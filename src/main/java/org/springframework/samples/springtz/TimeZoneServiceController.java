@@ -24,15 +24,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.Resource;
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.integration.Message;
-import org.springframework.integration.channel.AbstractMessageChannel;
-import org.springframework.integration.core.MessagingTemplate;
-import org.springframework.integration.support.MessageBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -49,20 +45,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/tz")
 public class TimeZoneServiceController {
 
-	/*
-	 * The channels we're going to use.
+	/**
+	 * The gateway for our messaging.
 	 */
-	private AbstractMessageChannel idsRequestChannel;
-	private AbstractMessageChannel offsetRequestChannel;
-
-	private static long sendReceiveTimeout = 2000L;
-
-	private final MessagingTemplate template = new MessagingTemplate();
-
-	public TimeZoneServiceController() {
-		template.setReceiveTimeout(sendReceiveTimeout);
-		template.setSendTimeout(sendReceiveTimeout);
-	}
+	TimeZoneServiceGateway timeZoneServiceGateway;
 
 	/**
 	 * Get the available ids.
@@ -75,17 +61,8 @@ public class TimeZoneServiceController {
 	@ResponseBody
 	public List<?> getAvailableIDs(HttpServletResponse httpResponse)
 			throws IOException {
-		List<?> result = null;
 
-		Message<String> request = MessageBuilder.withPayload("").build();
-		Message<?> reply = template.sendAndReceive(idsRequestChannel, request);
-
-		if (reply != null) {
-			Object payload = reply.getPayload();
-			if (payload instanceof List<?>) {
-				result = (List<?>) reply.getPayload();
-			}
-		}
+		List<?> result = timeZoneServiceGateway.getAvailableIDs("");
 
 		if (result == null) {
 			httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -114,20 +91,8 @@ public class TimeZoneServiceController {
 			@RequestParam("when") Date when, HttpServletResponse httpResponse)
 			throws IOException {
 
-		Integer result = null;
-
 		String id = country + "/" + locality;
-		Message<String> request = MessageBuilder.withPayload(id)
-				.setHeader("when", when).build();
-
-		Message<?> reply = template.sendAndReceive(offsetRequestChannel,
-				request);
-		if (reply != null) {
-			Object payload = reply.getPayload();
-			if (payload instanceof Integer) {
-				result = (Integer) payload;
-			}
-		}
+		Integer result = timeZoneServiceGateway.getOffset(id, when);
 
 		if (result == null) {
 			httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -152,15 +117,10 @@ public class TimeZoneServiceController {
 				parser, false));
 	}
 
-	@Resource(name = "idsRequestChannel")
-	public void setIdsRequestChannel(AbstractMessageChannel idsRequestChannel) {
-		this.idsRequestChannel = idsRequestChannel;
-	}
-
-	@Resource(name = "offsetRequestChannel")
-	public void setOffsetRequestChannel(
-			AbstractMessageChannel offsetRequestChannel) {
-		this.offsetRequestChannel = offsetRequestChannel;
+	@Inject
+	public void setTimeZoneServiceGateway(
+			TimeZoneServiceGateway timeZoneServiceGateway) {
+		this.timeZoneServiceGateway = timeZoneServiceGateway;
 	}
 
 }
