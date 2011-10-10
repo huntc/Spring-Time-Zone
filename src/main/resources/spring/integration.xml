@@ -82,7 +82,7 @@
 	</si:service-activator>
 
 	<si:channel id="idsRequestChannel" />
-	
+
 	<si:channel id="idsQueueChannel">
 		<si:queue capacity="100" />
 	</si:channel>
@@ -115,9 +115,11 @@
 
 	<rabbit:admin connection-factory="amqpConnectionFactory" />
 
-	<rabbit:queue name="org.springframework.samples.springtz.ids" />
+	<rabbit:queue name="org.springframework.samples.springtz.ids"
+		durable="false" />
 
-	<rabbit:queue name="org.springframework.samples.springtz.offset" />
+	<rabbit:queue name="org.springframework.samples.springtz.offset"
+		durable="false" />
 
 	<rabbit:direct-exchange name="org.springframework.samples.springtz">
 		<rabbit:bindings>
