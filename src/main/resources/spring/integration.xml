@@ -23,7 +23,7 @@
 		first day) -->
 	<bean id="zoneinfoFtpClientFactory"
 		class="org.springframework.integration.ftp.session.DefaultFtpSessionFactory">
-		<property name="host" value="elsie.nci.nih.gov" />
+		<property name="host" value="munnari.oz.au" />
 		<property name="port" value="21" />
 		<property name="username" value="anonymous" />
 		<property name="password" value="anonymous" />
