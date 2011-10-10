@@ -96,7 +96,8 @@
 	<!-- Wire up AMQP -->
 
 	<amqp:outbound-gateway request-channel="idsRequestChannel"
-		exchange-name="org.springframework.samples.springtz" routing-key="ids" />
+		exchange-name="org.springframework.samples.springtz" routing-key="ids"
+		amqp-template="amqpTemplate" />
 
 	<amqp:inbound-gateway queue-names="org.springframework.samples.springtz.ids"
 		request-channel="idsQueueChannel" connection-factory="amqpConnectionFactory" />
