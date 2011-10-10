@@ -71,15 +71,26 @@
 	<!-- Wire up the tz service so that it can be called by anything in the 
 		Java world such as the web service. -->
 
+	<si:gateway id="timeZoneServiceGateway"
+		service-interface="org.springframework.samples.springtz.TimeZoneServiceGateway">
+		<si:method name="getAvailableIDs" request-channel="idsRequestChannel" />
+		<si:method name="getOffset" request-channel="offsetRequestChannel" />
+	</si:gateway>
+
 	<si:service-activator input-channel="idsQueueChannel"
 		ref="timeZoneService" method="getAvailableIDs">
 		<si:poller receive-timeout="30000" fixed-rate="10" />
 	</si:service-activator>
 
-	<si:service-activator input-channel="offsetQueueChannel"
-		expression="@timeZoneService.getOffset(payload, headers.when)">
+	<!-- https://jira.springsource.org/browse/INT-2171 Need to filter out the 
+		amqp_contentType here due to a bug. Should be fixed with the M2 release. -->
+	<si:chain input-channel="offsetQueueChannel">
+		<si:service-activator
+			expression="@timeZoneService.getOffset(payload, headers.when)">
+		</si:service-activator>
+		<si:header-filter header-names="amqp_contentType" />
 		<si:poller receive-timeout="30000" fixed-rate="10" />
-	</si:service-activator>
+	</si:chain>
 
 	<si:channel id="idsRequestChannel" />
 
