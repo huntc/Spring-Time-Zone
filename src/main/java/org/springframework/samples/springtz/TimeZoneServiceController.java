@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -45,25 +47,28 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/tz")
 public class TimeZoneServiceController {
 
-	/**
-	 * The gateway for our messaging.
-	 */
-	TimeZoneServiceGateway timeZoneServiceGateway;
+	private TimeZoneServiceGateway timeZoneServiceGateway;
 
 	/**
 	 * Get the available ids.
 	 * 
-	 * @return a list of ides.
+	 * @return a list of ids.
 	 * @throws IOException
 	 *             something went wrong.
+	 * @throws ExecutionException
+	 *             thread issue.
+	 * @throws InterruptedException
+	 *             thread issue.
 	 */
 	@RequestMapping(value = "ids", method = RequestMethod.GET)
 	@ResponseBody
 	public List<?> getAvailableIDs(HttpServletResponse httpResponse)
-			throws IOException {
+			throws IOException, InterruptedException, ExecutionException,
+			TimeoutException {
 
 		List<?> result = timeZoneServiceGateway.getAvailableIDs("");
 
+		// Pass back a 404 if we've got nothing to return.
 		if (result == null) {
 			httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
 		}
@@ -83,13 +88,15 @@ public class TimeZoneServiceController {
 	 * @return the model object key to use in the response.
 	 * @throws IOException
 	 *             something went wrong.
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 */
 	@RequestMapping(value = "offset/{country}/{locality}", method = RequestMethod.GET)
 	@ResponseBody
 	public Integer getOffset(@PathVariable("country") String country,
 			@PathVariable("locality") String locality,
 			@RequestParam("when") Date when, HttpServletResponse httpResponse)
-			throws IOException {
+			throws IOException, InterruptedException, ExecutionException {
 
 		String id = country + "/" + locality;
 		Integer result = timeZoneServiceGateway.getOffset(id, when);
