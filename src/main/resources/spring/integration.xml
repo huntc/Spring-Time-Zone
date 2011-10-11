@@ -75,6 +75,7 @@
 		Java world such as the web service. -->
 
 	<si:gateway id="timeZoneServiceGateway"
+		default-reply-timeout="2000" default-request-timeout="2000"
 		service-interface="org.springframework.samples.springtz.TimeZoneServiceGateway">
 		<si:method name="getAvailableIDs" request-channel="idsRequestChannel" />
 		<si:method name="getOffset" request-channel="offsetRequestChannel" />
