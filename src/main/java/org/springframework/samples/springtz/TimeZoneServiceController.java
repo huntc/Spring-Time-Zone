@@ -23,6 +23,9 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -56,17 +59,25 @@ public class TimeZoneServiceController {
 	 */
 	@RequestMapping(value = "ids", method = RequestMethod.GET)
 	@ResponseBody
-	public List<?> getAvailableIDs(HttpServletResponse httpResponse)
-			throws IOException {
+	public Future<List<String>> getAvailableIDs(
+			final HttpServletResponse httpResponse) throws IOException {
 
-		List<?> result = timeZoneServiceGateway.getAvailableIDs("");
+		final Future<List<String>> futureResult = timeZoneServiceGateway
+				.getAvailableIDs("");
 
-		// Pass back a 404 if we've got nothing to return.
-		if (result == null) {
-			httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
-		}
+		return new FutureTask<List<String>>(new Callable<List<String>>() {
+			@Override
+			public List<String> call() throws Exception {
+				List<String> result = futureResult.get();
 
-		return result;
+				// Pass back a 404 if we've got nothing to return.
+				if (result == null) {
+					httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
+				}
+				return result;
+			}
+
+		});
 	}
 
 	/**
